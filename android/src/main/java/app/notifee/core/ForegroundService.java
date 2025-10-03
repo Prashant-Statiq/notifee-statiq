@@ -86,7 +86,7 @@ public class ForegroundService extends Service {
     Bundle extras = intent.getExtras();
 
     if (extras != null) {
-      // Hash code is sent to service to ensure it is kept the same
+      // Hash code is sent to the service to ensure it is kept the same
       int hashCode = extras.getInt("hashCode");
       Notification notification = extras.getParcelable("notification");
       Bundle bundle = extras.getBundle("notificationBundle");
@@ -96,6 +96,14 @@ public class ForegroundService extends Service {
 
         if (mCurrentNotificationId == null) {
           mCurrentNotificationId = notificationModel.getId();
+
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // Modify behavior before using notification
+            Notification.Builder builder =
+                Notification.Builder.recoverBuilder(ContextHolder.getApplicationContext(), notification);
+            builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE);
+            notification = builder.build();
+          }
 
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             int foregroundServiceType = notificationModel.getAndroid().getForegroundServiceType();
